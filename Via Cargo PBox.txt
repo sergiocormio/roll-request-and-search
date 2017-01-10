@@ -1,0 +1,7 @@
+Una caja de texto con el número mínimo para empezar a recorrer
+ms entre request y request
+Una caja de texto con un texto a encontrar
+expresión de corte: "Sin datos"
+
+Imprime los que da resultado
+Para cuando no hay resultado

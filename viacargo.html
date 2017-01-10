@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<title>Via Cargo - Browser Script</title>
+
+	<script language="Javascript">
+	function httpGet(theUrl)
+	{
+	    var xmlHttp = new XMLHttpRequest();
+	    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+	    xmlHttp.send( null );
+	    return xmlHttp.responseText;
+	}
+
+	function beginProcess(){
+		var beginNumber = parseInt(document.getElementById("beginNumber").value);
+		var countNumber = parseInt(document.getElementById("countNumber").value);
+		var matchText = document.getElementById("matchText").value;
+		var stopText = document.getElementById("stopText").value;
+		var i=0;
+		var found = false, stop=false;
+		var result = document.getElementById("resultDiv");
+		result.innerHTML = "Buscando, aguarde por favor... ";
+		
+		var content;
+
+		while(i<countNumber && !found && !stop){
+			content = httpGet("http://www.viacargo.com.ar/tracking/consulta/r/1/"+ beginNumber+"/5266");
+
+			if( content.indexOf(matchText) > -1 ){
+				result.innerHTML = "<b>ENCONTRADO con el número: "+beginNumber+"</b><br>" + content;
+				found=true;
+			} if( content.indexOf(stopText) > -1 ){
+				result.innerHTML = "Se alcanzó el texto de STOP... en " + beginNumber
+				stop=true;
+			} else{
+				i++;
+				beginNumber++;
+			}
+		}
+
+		if(!found && i == countNumber){
+			result.innerHTML = "Se alcanzó el número máximo de búsqueda en " + beginNumber
+		}
+	}
+
+	</script>
+</head>
+<body>
+
+	Comenzar en: <input id="beginNumber" type="text" value="8061"/>
+	<br>
+	Cantidad de números a buscar: <input id="countNumber" type="text" value="1000"/>
+	<br>
+	Texto a buscar: <input id="matchText" type="text" value="MAYER"/>
+	<br>
+	Texto de STOP: <input id="stopText" type="text" value="Sin datos"/>
+	<br>
+	<button onclick="beginProcess()" type="button">Comenzar!</button>
+
+	<div id="resultDiv"></div>
+
+</body>
+</html>
