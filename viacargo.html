@@ -11,13 +11,13 @@
 
 	var found = false, stop=false;
 	var beginNumber, countNumber, stopText, i;
+	var xmlHttp;
 
 	function httpGet( theUrl ){
-	    var xmlHttp = new XMLHttpRequest();
+	    xmlHttp = new XMLHttpRequest();
 	    xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
-	    xmlHttp.onload = onLoadContent;
+	    xmlHttp.onreadystatechange = onLoadContent;
 	    xmlHttp.send( null );
-	    return xmlHttp.responseText;
 	}
 
 	function callURL( number ){
@@ -27,8 +27,12 @@
 	}
 
 	function onLoadContent( e ){
+		if (xmlHttp.readyState != 4) {
+			return;
+		}
+
 		var result = document.getElementById("resultDiv");
-    	var content = e.currentTarget.responseText;
+    	var content = xmlHttp.responseText;
     	$('.matchText').each( function(){
 			var matchText = this.value;
 			if( content.indexOf(matchText) > -1 ){
