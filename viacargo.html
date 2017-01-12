@@ -5,6 +5,8 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 	<title>Via Cargo - Browser Script</title>
 
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	
 	<script language="Javascript">
 	function httpGet(theUrl)
 	{
@@ -17,7 +19,6 @@
 	function beginProcess(){
 		var beginNumber = parseInt(document.getElementById("beginNumber").value);
 		var countNumber = parseInt(document.getElementById("countNumber").value);
-		var matchText = document.getElementById("matchText").value;
 		var stopText = document.getElementById("stopText").value;
 		var i=0;
 		var found = false, stop=false;
@@ -25,38 +26,62 @@
 		result.innerHTML = "Buscando, aguarde por favor... ";
 		
 		var content;
+		var nextNumber;
 
 		while(i<countNumber && !found && !stop){
 			content = httpGet("http://www.viacargo.com.ar/tracking/consulta/r/1/"+ beginNumber+"/5266");
 
-			if( content.indexOf(matchText) > -1 ){
-				result.innerHTML = "<b>ENCONTRADO con el número: "+beginNumber+"</b><br>" + content;
-				found=true;
-			} if( content.indexOf(stopText) > -1 ){
+			$('.matchText').each( function(){
+				var matchText = this.value;
+				if( content.indexOf(matchText) > -1 ){
+					result.innerHTML = "<b>ENCONTRADO con el número: "+beginNumber+"</b><br>" + content;
+					found=true;
+					return;
+				}
+			})
+			
+			if(found){
+				nextNumber = beginNumber + 1;
+				break;
+			}
+
+			if( content.indexOf(stopText) > -1 ){
 				result.innerHTML = "Se alcanzó el texto de STOP... en " + beginNumber
 				stop=true;
 			} else{
 				i++;
 				beginNumber++;
 			}
-		}
+
+			nextNumber = beginNumber;
+		} // end of while
 
 		if(!found && i == countNumber){
-			result.innerHTML = "Se alcanzó el número máximo de búsqueda en " + beginNumber
+			result.innerHTML = "Se alcanzó el número máximo de búsqueda en " + beginNumber;
 		}
 
-		document.getElementById("beginNumber").value = beginNumber;
+		document.getElementById("beginNumber").value = nextNumber;
 	}
+
+	function addMoreSearchFields(){
+		$("#fieldList").append("<li>Texto a buscar: <input class='matchText' type='text' name='field'/><button onclick='removeRow(this)'>-</button></li>");
+	}
+
+	function removeRow( obj ){
+		$(obj).parent().remove();
+	}
+
 
 	</script>
 </head>
 <body>
-
 	Comenzar en: <input id="beginNumber" type="text" value="8150"/>
 	<br>
 	Cantidad de números a buscar: <input id="countNumber" type="text" value="1000"/>
 	<br>
-	Texto a buscar: <input id="matchText" type="text" value="MAYER"/>
+	<ul id="fieldList">
+		<li>Texto a buscar: <input class="matchText" type="text" value="MAYER"/><button id="addMore" onclick="addMoreSearchFields()">+</button></li> 
+	</ul>
 	<br>
 	Texto de STOP: <input id="stopText" type="text" value="Sin datos"/>
 	<br>
