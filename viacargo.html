@@ -8,59 +8,64 @@
 	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 	
 	<script language="Javascript">
-	function httpGet(theUrl)
-	{
+
+	var found = false, stop=false;
+	var beginNumber, countNumber, stopText, i;
+
+	function httpGet( theUrl ){
 	    var xmlHttp = new XMLHttpRequest();
-	    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+	    xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
+	    xmlHttp.onload = onLoadContent;
 	    xmlHttp.send( null );
 	    return xmlHttp.responseText;
 	}
 
-	function beginProcess(){
-		var beginNumber = parseInt(document.getElementById("beginNumber").value);
-		var countNumber = parseInt(document.getElementById("countNumber").value);
-		var stopText = document.getElementById("stopText").value;
-		var i=0;
-		var found = false, stop=false;
+	function callURL( number ){
 		var result = document.getElementById("resultDiv");
-		result.innerHTML = "Buscando, aguarde por favor... ";
-		
-		var content;
-		var nextNumber;
+		result.innerHTML = "Buscando, probando ID: " + number +", aguarde por favor... ";
+ 		httpGet("http://www.viacargo.com.ar/tracking/consulta/r/1/"+ number+"/5266");
+	}
 
-		while(i<countNumber && !found && !stop){
-			content = httpGet("http://www.viacargo.com.ar/tracking/consulta/r/1/"+ beginNumber+"/5266");
-
-			$('.matchText').each( function(){
-				var matchText = this.value;
-				if( content.indexOf(matchText) > -1 ){
-					result.innerHTML = "<b>ENCONTRADO con el número: "+beginNumber+"</b><br>" + content;
-					found=true;
-					return;
-				}
-			})
-			
-			if(found){
-				nextNumber = beginNumber + 1;
-				break;
+	function onLoadContent( e ){
+		var result = document.getElementById("resultDiv");
+    	var content = e.currentTarget.responseText;
+    	$('.matchText').each( function(){
+			var matchText = this.value;
+			if( content.indexOf(matchText) > -1 ){
+				result.innerHTML = "<b>ENCONTRADO con el número: "+beginNumber+"</b><br>" + content;
+				found=true;
+				return;
 			}
+		})
 
-			if( content.indexOf(stopText) > -1 ){
-				result.innerHTML = "Se alcanzó el texto de STOP... en " + beginNumber
-				stop=true;
-			} else{
-				i++;
-				beginNumber++;
-			}
-
-			nextNumber = beginNumber;
-		} // end of while
-
-		if(!found && i == countNumber){
+		if(found){
+			document.getElementById("beginNumber").value = beginNumber + 1;
+			document.getElementById("beginButton").disabled = false;
+		}else if( content.indexOf(stopText) > -1 ){
+			result.innerHTML = "Se alcanzó el texto de STOP... en " + beginNumber
+			document.getElementById("beginNumber").value = beginNumber;
+			document.getElementById("beginButton").disabled = false;
+		}else if(i == countNumber){
 			result.innerHTML = "Se alcanzó el número máximo de búsqueda en " + beginNumber;
+			document.getElementById("beginNumber").value = beginNumber;
+			document.getElementById("beginButton").disabled = false;
+		}else{
+			i++;
+			beginNumber++;
+			callURL( beginNumber );
 		}
 
-		document.getElementById("beginNumber").value = nextNumber;
+	}
+
+	function beginProcess(){
+		document.getElementById("beginButton").disabled = true;
+		beginNumber = parseInt(document.getElementById("beginNumber").value);
+		countNumber = parseInt(document.getElementById("countNumber").value);
+		stopText = document.getElementById("stopText").value;
+		i=0;
+		found = false, stop=false;
+		
+		callURL( beginNumber );
 	}
 
 	function addMoreSearchFields(){
@@ -85,7 +90,7 @@
 	<br>
 	Texto de STOP: <input id="stopText" type="text" value="Sin datos"/>
 	<br>
-	<button onclick="beginProcess()" type="button">Comenzar!</button>
+	<button id="beginButton" onclick="beginProcess()" type="button">Comenzar!</button>
 
 	<div id="resultDiv"></div>
 
