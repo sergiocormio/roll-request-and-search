@@ -44,13 +44,15 @@
 		if(!found && i == countNumber){
 			result.innerHTML = "Se alcanzó el número máximo de búsqueda en " + beginNumber
 		}
+
+		document.getElementById("beginNumber").value = beginNumber;
 	}
 
 	</script>
 </head>
 <body>
 
-	Comenzar en: <input id="beginNumber" type="text" value="8061"/>
+	Comenzar en: <input id="beginNumber" type="text" value="8150"/>
 	<br>
 	Cantidad de números a buscar: <input id="countNumber" type="text" value="1000"/>
 	<br>
